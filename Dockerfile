@@ -6,7 +6,6 @@ ENV PYTHONPATH "${PYTHONPATH}:/code/src/"
 ADD . /code
 WORKDIR /code
 
-
 COPY . .
 
 RUN pip install --no-cache-dir pipenv && pipenv install --dev --system --deploy

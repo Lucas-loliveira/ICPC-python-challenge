@@ -219,7 +219,7 @@ def test_create_competition_with_no_minimun_score(api_client, team):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-@pytest.mark.django_db(transaction=True,)
+@pytest.mark.django_db(transaction=True)
 def test_get_competition_by_year(api_client, team):
     url = reverse("competition-list")
     competition_2019 = {
@@ -236,7 +236,7 @@ def test_get_competition_by_year(api_client, team):
     }
     api_client.post(url, competition_2019)
     api_client.post(url, competition_2020)
-    
+
     response = api_client.get(url, {"year": 2019})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 1
