@@ -54,7 +54,12 @@ def test_delete_participant(api_client, participant):
 def test_create_team(api_client, participants):
     participants_ids_list = list(Participant.objects.values_list("id", flat=True))
     url = reverse("team-list")
-    data = {"members_id": participants_ids_list}
+    data = {
+        "members_id": participants_ids_list,
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
     response = api_client.post(url, data)
     assert response.status_code == status.HTTP_201_CREATED
     assert (
@@ -68,7 +73,12 @@ def test_create_team(api_client, participants):
 def test_create_team_exceeded_maximum_members(api_client, participants):
     participants_ids_list = list(Participant.objects.values_list("id", flat=True))
     url = reverse("team-list")
-    data = {"members_id": participants_ids_list}
+    data = {
+        "members_id": participants_ids_list,
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
     response = api_client.post(url, data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -82,7 +92,12 @@ def test_create_participant_with_diferent_nacionality(api_client, participants):
     foreign_participant.save()
 
     url = reverse("team-list")
-    data = {"members_id": participants_ids_list}
+    data = {
+        "members_id": participants_ids_list,
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
     response = api_client.post(url, data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert foreign_participant.country_of_origin == "Tunisia"
@@ -91,7 +106,12 @@ def test_create_participant_with_diferent_nacionality(api_client, participants):
 @pytest.mark.django_db(transaction=True)
 def test_create_team_participant_not_exists(api_client):
     url = reverse("team-list")
-    data = {"members_id": [1, 2, 3]}
+    data = {
+        "members_id": [1, 2, 3],
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
     response = api_client.post(url, data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -102,7 +122,12 @@ def test_update_add_participant(api_client, participants):
     participant = Participant.objects.first()
     team = Team.objects.create()
     url = reverse("team-detail", kwargs={"pk": team.id})
-    data = {"members_id": [participant.id]}
+    data = {
+        "members_id": [participant.id],
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
 
     response = api_client.put(url, data)
     assert response.status_code == status.HTTP_200_OK
@@ -117,7 +142,12 @@ def test_update_remove_participant(api_client, participants):
     team.members.set(participant)
 
     url = reverse("team-detail", kwargs={"pk": team.id})
-    data = {"members_id": []}
+    data = {
+        "members_id": [],
+        "name": "team test",
+        "country_of_origin": "Brazil",
+        "representative_name": "Lucas",
+    }
     response = api_client.put(url, data)
     assert response.status_code == status.HTTP_200_OK
     assert Team.objects.get(id=response.json()["id"]).members.count() == 0
@@ -187,3 +217,26 @@ def test_create_competition_with_no_minimun_score(api_client, team):
     }
     response = api_client.post(url, data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db(transaction=True,)
+def test_get_competition_by_year(api_client, team):
+    url = reverse("competition-list")
+    competition_2019 = {
+        "team": team.id,
+        "instance": "Local",
+        "year": 2019,
+        "score": SCORE_NEEDED_TO_PASS,
+    }
+    competition_2020 = {
+        "team": team.id,
+        "instance": "National",
+        "year": 2020,
+        "score": MAX_SCORE,
+    }
+    api_client.post(url, competition_2019)
+    api_client.post(url, competition_2020)
+    
+    response = api_client.get(url, {"year": 2019})
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
