@@ -25,6 +25,11 @@ How to run the app
 $ make build up
 ```
 
+### Run the migrations
+```bash
+$ make migrate
+```
+
 Tests
 =====
 
