@@ -20,20 +20,23 @@ class Participant(models.Model):
 
 class Team(models.Model):
     members = models.ManyToManyField(Participant)
+    name = models.CharField(max_length=50)
+    country_of_origin = models.CharField(max_length=50)
+    representative_name = models.CharField(max_length=100)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.name)
 
 
 class Competition(models.Model):
     INSTANCE_CHOICE = (
-        ("LO", "Local"),
-        ("NA", "National"),
-        ("RE", "Regional"),
-        ("IN", "International"),
+        ("00LO", "Local"),
+        ("01NA", "National"),
+        ("02RE", "Regional"),
+        ("03IN", "International"),
     )
     team = models.ForeignKey(Team, on_delete=models.CASCADE, default=None)
-    instance = models.CharField(choices=INSTANCE_CHOICE, max_length=2)
+    instance = models.CharField(choices=INSTANCE_CHOICE, max_length=4)
     year = models.IntegerField()
     score = models.IntegerField()
 
